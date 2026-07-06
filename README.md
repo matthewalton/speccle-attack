@@ -28,3 +28,5 @@ the glossary.
 ## Status
 
 Early. Currently dogfooding on this repo's own PRs.
+
+_Dogfooding note: PR #1 carries this repo's first attacked-and-held report._
