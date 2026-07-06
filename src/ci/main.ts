@@ -4,7 +4,6 @@
  * comment body for the workflow to post.
  *
  * Env in:
- *   HEAD_SHA               the PR's actual head SHA (required)
  *   EXISTING_COMMENT_FILE  path to the current sticky comment body, if any
  *   COMMENT_OUT            where to write the rendered comment (required)
  *   GITHUB_OUTPUT          standard Actions output file, receives should_post
@@ -26,13 +25,28 @@ function output(key: string, value: string): void {
   if (file) appendFileSync(file, `${key}=${value}\n`);
 }
 
+/**
+ * The newest commit touching anything other than the manifest and attack
+ * tests. The skill's own commit (attacks + manifest only) must not count as
+ * new code, or every report would be born stale.
+ */
+function effectiveCodeHead(): string {
+  const out = spawnSync(
+    "git",
+    ["rev-list", "-1", "HEAD", "--", ".", ":(exclude).speccle", ":(exclude)*.attack.test.*"],
+    { encoding: "utf8" },
+  ).stdout.trim();
+  if (!out) throw new Error("could not compute effective code head — is history fetched?");
+  return out;
+}
+
 function main(): number {
-  const headSha = process.env.HEAD_SHA;
   const commentOut = process.env.COMMENT_OUT;
-  if (!headSha || !commentOut) {
-    console.error("HEAD_SHA and COMMENT_OUT are required");
+  if (!commentOut) {
+    console.error("COMMENT_OUT is required");
     return 1;
   }
+  const headSha = effectiveCodeHead();
 
   if (!existsSync(MANIFEST_PATH)) {
     console.log(`No ${MANIFEST_PATH} on this branch — nothing to do.`);
@@ -71,7 +85,7 @@ function main(): number {
   output("should_post", "true");
 
   if (manifest.headSha !== headSha) {
-    console.error(`Stale: manifest is for ${manifest.headSha}, head is ${headSha}. Comment posted with warning.`);
+    console.error(`Stale: manifest is for ${manifest.headSha}, code head is ${headSha}. Comment posted with warning.`);
     return 1;
   }
   console.log(`Report rendered: ${report.claims.length} claims, ${results.length} executed attack tests.`);

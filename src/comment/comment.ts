@@ -29,7 +29,7 @@ export interface RenderInput {
   report: JoinedReport;
   /** SHA the manifest was generated against. */
   manifestSha: string;
-  /** The PR's actual head SHA at render time. */
+  /** The branch's effective code head (newest commit outside .speccle/ and attack files). */
   headSha: string;
   /** Claims the author has opted out via checkboxes. */
   curatedOut: ReadonlySet<string>;
@@ -47,7 +47,7 @@ export function renderStickyComment({ report, manifestSha, headSha, curatedOut }
   if (stale) {
     lines.push(
       `> [!WARNING]`,
-      `> **Stale.** This report was generated against \`${short(manifestSha)}\` but the PR head is \`${short(headSha)}\`. Re-run your local agent to refresh it.`,
+      `> **Stale.** This report was generated against \`${short(manifestSha)}\` but the code head is \`${short(headSha)}\`. Re-run your local agent to refresh it.`,
       "",
     );
   }

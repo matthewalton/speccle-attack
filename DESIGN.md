@@ -50,6 +50,10 @@ Each was an explicit choice among alternatives.
 - **Title-token join:** attack test titles carry `[speccle:<claimId>]`; CI joins test
   results to claims by token. Claim IDs are short stable slugs assigned at inference and
   reused across re-inference so curation state survives pushes.
+- **Staleness:** compared against the branch's *effective code head* — the newest
+  commit touching anything outside `.speccle/` and `*.attack.test.*`. The skill commits
+  attacks + manifest separately from code, so its own commit never makes a report
+  stale; any real code push does.
 - **Curation source of truth:** the sticky comment's checkbox state. The manifest holds
   the full inferred claim list; CI re-renders the report on comment edit, excluding
   unticked claims; the local agent reads checkbox state via `gh` before generating

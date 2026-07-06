@@ -33,7 +33,12 @@ export interface Claim {
 
 export interface Manifest {
   version: typeof MANIFEST_VERSION;
-  /** Head SHA the manifest was generated against; mismatch with the PR head means stale. */
+  /**
+   * The code head the attacks were generated against: the newest commit
+   * touching files outside `.speccle/` and `*.attack.test.*`. Compared against
+   * the same computation on the PR branch to detect staleness — the speccle
+   * commit itself (attacks + manifest only) never makes a report stale.
+   */
   headSha: string;
   claims: Claim[];
 }

@@ -18,8 +18,9 @@
   claims and their attack records; the contract between any local agent and CI.
 - **Sticky comment** — the single bot comment on the PR, owned by CI, holding the
   claims checklist and the latest attack report.
-- **Stale** — the manifest's recorded head SHA no longer matches the PR's actual head;
-  the report can't be trusted until the local agent re-runs.
+- **Stale** — the manifest was generated against an older code head: commits touching
+  real code (anything outside the manifest and attack files) have landed since. The
+  report can't be trusted until the local agent re-runs.
 - **Adjudication** — the author resolving a landed attack as either a bug or expected
   behavior.
 - **Dismissed** — a landed attack adjudicated as expected behavior; it moves to a
