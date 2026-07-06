@@ -1,0 +1,17 @@
+{
+  "name": "speccle",
+  "version": "0.1.0",
+  "description": "Turn PR signals into trust: an agent attacks your PR's claims with real tests; CI re-executes them and reports what held.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.0"
+  }
+}
