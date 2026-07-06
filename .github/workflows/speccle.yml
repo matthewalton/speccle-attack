@@ -1,0 +1,79 @@
+# Speccle CI — zero LLM. Re-executes the branch's committed attack tests and
+# owns the one sticky comment. Runs on PR pushes and on sticky-comment edits
+# (checkbox curation). Report-only: never blocks merge.
+name: speccle
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: speccle-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  attack-report:
+    # For comment edits, only react to edits of our own sticky comment on a PR.
+    if: >-
+      github.event_name == 'pull_request' ||
+      (github.event.issue.pull_request && contains(github.event.comment.body, 'speccle:sticky'))
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+    steps:
+      - name: Resolve PR head
+        id: pr
+        run: |
+          HEAD_SHA=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json headRefOid --jq .headRefOid)
+          echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.head_sha }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Fetch existing sticky comment
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" --paginate \
+            --jq '.[] | select(.body | contains("speccle:sticky")) | .id' \
+            | head -n1 > /tmp/sticky-id || true
+          if [ -s /tmp/sticky-id ]; then
+            gh api "repos/$GITHUB_REPOSITORY/issues/comments/$(cat /tmp/sticky-id)" \
+              --jq .body > /tmp/sticky-body
+          fi
+
+      - name: Re-execute attacks and render report
+        id: report
+        env:
+          HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+          EXISTING_COMMENT_FILE: /tmp/sticky-body
+          COMMENT_OUT: /tmp/sticky-new
+        run: node src/ci/main.ts
+
+      - name: Post sticky comment
+        if: always() && steps.report.outputs.should_post == 'true'
+        run: |
+          if [ -s /tmp/sticky-id ]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$(cat /tmp/sticky-id)" \
+              -F body=@/tmp/sticky-new > /dev/null
+          else
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+              -F body=@/tmp/sticky-new > /dev/null
+          fi

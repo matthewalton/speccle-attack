@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { claimToken, extractClaimId, joinResults, type TestResult } from "./join.js";
-import type { Manifest } from "./manifest.js";
+import { claimToken, extractClaimId, joinResults, type TestResult } from "./join.ts";
+import type { Manifest } from "./manifest.ts";
 
 const manifest: Manifest = {
   version: 1,

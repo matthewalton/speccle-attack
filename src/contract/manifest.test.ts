@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ManifestError, parseManifest, slugForClaim } from "./manifest.js";
+import { ManifestError, parseManifest, slugForClaim } from "./manifest.ts";
 
 const valid = {
   version: 1,

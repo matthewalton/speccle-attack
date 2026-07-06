@@ -1,4 +1,5 @@
 node_modules/
+.speccle/vitest-results.json
 dist/
 *.tsbuildinfo
 .DS_Store

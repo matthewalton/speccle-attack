@@ -4,7 +4,7 @@
  * tests were produced.
  */
 
-import type { AttackOutcome, AttackRecord, Manifest } from "./manifest.js";
+import type { AttackOutcome, AttackRecord, Manifest } from "./manifest.ts";
 
 const TOKEN_RE = /\[speccle:([a-z0-9][a-z0-9-]*)\]/;
 
