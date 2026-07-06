@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "headSha": "57c2a0013a9998bda75a2802a26030424e58f9ff",
+  "claims": [
+    {
+      "id": "claim-text-containing-newlines",
+      "text": "Claim text containing newlines cannot inject phantom checkbox lines or corrupt curation",
+      "source": "description",
+      "attacks": [
+        {
+          "title": "[speccle:claim-text-containing-newlines] LF injection of a full unticked checkbox line is not parsed as curation",
+          "file": "src/comment/comment.attack.test.ts",
+          "outcome": "held"
+        },
+        {
+          "title": "[speccle:claim-text-containing-newlines] CRLF injection cannot smuggle a checkbox line past the sanitizer",
+          "file": "src/comment/comment.attack.test.ts",
+          "outcome": "held"
+        },
+        {
+          "title": "[speccle:claim-text-containing-newlines] injecting a TICKED box for the claim's own id cannot shadow real curation state",
+          "file": "src/comment/comment.attack.test.ts",
+          "outcome": "held"
+        },
+        {
+          "title": "[speccle:claim-text-containing-newlines] unicode line separators U+2028/U+2029 collapse instead of surviving into the body",
+          "file": "src/comment/comment.attack.test.ts",
+          "outcome": "held"
+        }
+      ]
+    },
+    {
+      "id": "whitespace-runs-in-claim",
+      "text": "Whitespace runs in claim text collapse to a single space in the checkbox line",
+      "source": "diff",
+      "attacks": []
+    }
+  ]
+}
