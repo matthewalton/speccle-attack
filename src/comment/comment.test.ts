@@ -77,6 +77,21 @@ describe("renderStickyComment", () => {
     expect(body).not.toContain("### Landed attacks");
   });
 
+  it("collapses whitespace in claim text so it cannot break the checkbox line", () => {
+    const hostile = {
+      ...report,
+      claims: [{ ...report.claims[0]!, text: "First line\n- [ ] `injected` — fake claim" }],
+    };
+    const body = renderStickyComment({
+      report: hostile,
+      manifestSha: "abc",
+      headSha: "abc",
+      curatedOut: new Set(),
+    });
+    expect(body).toContain("First line - [ ] `injected` — fake claim");
+    expect(parseCuratedOut(body)).toEqual(new Set());
+  });
+
   it("reports orphaned attack tests", () => {
     const body = render({
       report: { ...report, orphans: [{ title: "[speccle:gone] probe", file: "src/x.attack.test.ts", passed: true }] },

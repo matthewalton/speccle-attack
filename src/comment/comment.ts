@@ -64,6 +64,7 @@ export function renderStickyComment({ report, manifestSha, headSha, curatedOut }
   for (const claim of report.claims) {
     const isOut = curatedOut.has(claim.claimId);
     const box = isOut ? "[ ]" : "[x]";
+    const text = sanitizeClaimText(claim.text);
     const verdict = isOut
       ? "_curated out_"
       : claim.attempted === 0
@@ -71,7 +72,7 @@ export function renderStickyComment({ report, manifestSha, headSha, curatedOut }
         : claim.landed > 0
           ? `🔴 **${claim.landed} landed** of ${claim.attempted} attempted`
           : `🛡️ held ${claim.held}/${claim.attempted} attempted`;
-    lines.push(`- ${box} \`${claim.claimId}\` — ${claim.text} — ${verdict}`);
+    lines.push(`- ${box} \`${claim.claimId}\` — ${text} — ${verdict}`);
   }
 
   const landedAttacks = active.flatMap((claim) =>
@@ -103,6 +104,15 @@ export function renderStickyComment({ report, manifestSha, headSha, curatedOut }
   );
 
   return lines.join("\n");
+}
+
+/**
+ * Claim text is model-inferred and lands inside a line-oriented checkbox
+ * format — a newline in it could inject phantom checkbox lines and corrupt
+ * curation. Collapse all whitespace runs to single spaces.
+ */
+function sanitizeClaimText(text: string): string {
+  return text.replace(/\s+/g, " ").trim();
 }
 
 function short(sha: string): string {
